@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct Message: Identifiable, Hashable, Sendable {
+public class Message: ObservableObject, Identifiable {
 
     public enum Status: Equatable, Hashable, Sendable {
         case sending
@@ -44,19 +44,19 @@ public struct Message: Identifiable, Hashable, Sendable {
         }
     }
 
-    public var id: String
-    public var user: User
-    public var status: Status?
-    public var createdAt: Date
+    @Published public var id: String
+    @Published public var user: User
+    @Published public var status: Status?
+    @Published public var createdAt: Date
 
-    public var text: String
-    public var attachments: [Attachment]
-    public var reactions: [Reaction]
-    public var giphyMediaId: String?
-    public var recording: Recording?
-    public var replyMessage: ReplyMessage?
+    @Published public var text: String
+    @Published public var attachments: [Attachment]
+    @Published public var reactions: [Reaction]
+    @Published public var giphyMediaId: String?
+    @Published public var recording: Recording?
+    @Published public var replyMessage: ReplyMessage?
 
-    public var triggerRedraw: UUID?
+    @Published public var triggerRedraw: UUID?
 
     public init(id: String,
                 user: User,
@@ -139,35 +139,84 @@ extension Message: Equatable {
     }
 }
 
-public struct Recording: Codable, Hashable, Sendable {
-    public var duration: Double
-    public var waveformSamples: [CGFloat]
-    public var url: URL?
+extension Message: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.id)
+        hasher.combine(self.user)
+        hasher.combine(self.status)
+        hasher.combine(self.createdAt)
+        hasher.combine(self.text)
+        hasher.combine(self.attachments)
+        hasher.combine(self.recording)
+        hasher.combine(self.replyMessage)
+    }
+}
+
+public class Recording: ObservableObject, Codable {
+    private enum CodingKeys: CodingKey {
+        case duration
+        case waveformSamples
+        case url
+    }
+
+    @Published public var duration: Double
+    @Published public var waveformSamples: [CGFloat]
+    @Published public var url: URL?
 
     public init(duration: Double = 0.0, waveformSamples: [CGFloat] = [], url: URL? = nil) {
         self.duration = duration
         self.waveformSamples = waveformSamples
         self.url = url
     }
-}
 
-public struct ReplyMessage: Codable, Identifiable, Hashable, Sendable {
-    public static func == (lhs: ReplyMessage, rhs: ReplyMessage) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.user == rhs.user &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.text == rhs.text &&
-        lhs.attachments == rhs.attachments &&
-        lhs.recording == rhs.recording
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        duration = try container.decode(Double.self, forKey: .duration)
+        waveformSamples = try container.decode([CGFloat].self, forKey: .waveformSamples)
+        url = try container.decode(URL?.self, forKey: .url)
     }
 
-    public var id: String
-    public var user: User
-    public var createdAt: Date
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(waveformSamples, forKey: .waveformSamples)
+        try container.encode(url, forKey: .url)
+    }
+}
 
-    public var text: String
-    public var attachments: [Attachment]
-    public var recording: Recording?
+extension Recording: Equatable {
+    public static func == (lhs: Recording, rhs: Recording) -> Bool {
+        lhs.duration == rhs.duration &&
+        lhs.waveformSamples == rhs.waveformSamples &&
+        lhs.url == rhs.url
+    }
+}
+    
+extension Recording: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.duration)
+        hasher.combine(self.waveformSamples)
+        hasher.combine(self.url)
+    }
+}
+
+public class ReplyMessage: ObservableObject, Codable, Identifiable {
+    private enum CodingKeys: CodingKey {
+        case id
+        case user
+        case createdAt
+        case text
+        case attachments
+        case recording
+    }
+
+    @Published public var id: String
+    @Published public var user: User
+    @Published public var createdAt: Date
+
+    @Published public var text: String
+    @Published public var attachments: [Attachment]
+    @Published public var recording: Recording?
 
     public init(id: String,
                 user: User,
@@ -184,8 +233,50 @@ public struct ReplyMessage: Codable, Identifiable, Hashable, Sendable {
         self.recording = recording
     }
 
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        user = try container.decode(User.self, forKey: .user)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        text = try container.decode(String.self, forKey: .text)
+        attachments = try container.decode([Attachment].self, forKey: .attachments)
+        recording = try container.decode(Recording?.self, forKey: .recording)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(user, forKey: .user)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(text, forKey: .text)
+        try container.encode(attachments, forKey: .attachments)
+        try container.encode(recording, forKey: .recording)
+    }
+
     func toMessage() -> Message {
         Message(id: id, user: user, createdAt: createdAt, text: text, attachments: attachments, recording: recording)
+    }
+}
+
+extension ReplyMessage: Equatable {
+    public static func == (lhs: ReplyMessage, rhs: ReplyMessage) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.user == rhs.user &&
+        lhs.createdAt == rhs.createdAt &&
+        lhs.text == rhs.text &&
+        lhs.attachments == rhs.attachments &&
+        lhs.recording == rhs.recording
+    }
+}
+
+extension ReplyMessage: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.id)
+        hasher.combine(self.user)
+        hasher.combine(self.createdAt)
+        hasher.combine(self.text)
+        hasher.combine(self.attachments)
+        hasher.combine(self.recording)
     }
 }
 
