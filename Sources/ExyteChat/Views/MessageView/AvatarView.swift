@@ -6,11 +6,11 @@ import SwiftUI
 
 struct AvatarView: View {
 
-    let url: URL?
+    let user: User?
     let avatarSize: CGFloat
 
     var body: some View {
-        CachedAsyncImage(url: url, urlCache: .imageCache) { image in
+        CachedAsyncImage(url: user?.avatarURL, urlCache: .imageCache) { image in
             image
                 .resizable()
                 .scaledToFill()
@@ -25,7 +25,7 @@ struct AvatarView: View {
 struct AvatarView_Previews: PreviewProvider {
     static var previews: some View {
         AvatarView(
-            url: URL(string: "https://placeimg.com/640/480/sepia"),
+            user: User(id: UUID().uuidString, name: "Dummy User", avatarURL:URL(string: "https://placeimg.com/640/480/sepia"), isCurrentUser:false),
             avatarSize: 32
         )
     }

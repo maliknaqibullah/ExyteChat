@@ -61,7 +61,7 @@ struct ReactionOverview: View {
                                          
             HStack(spacing: -14) {
                 ForEach(reaction.users) { user in
-                    AvatarView(url: user.avatarURL, avatarSize: 32)
+                    AvatarView(user: user, avatarSize: 32)
                         .contentShape(Circle())
                         .overlay(
                             Circle()

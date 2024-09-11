@@ -625,14 +625,6 @@ public extension ChatView {
         view.paginationHandler = PaginationHandler(handleClosure: handler, pageSize: pageSize)
         return view
     }
-    
-    @available(*, deprecated)
-    func chatNavigation(title: String, status: String? = nil, cover: URL? = nil) -> some View {
-        var view = self
-        view.chatTitle = title
-        return view.modifier(ChatNavigationModifier(title: title, status: status, cover: cover))
-    }
-    
     // makes sense only for built-in message view
     
     func avatarSize(avatarSize: CGFloat) -> ChatView {
