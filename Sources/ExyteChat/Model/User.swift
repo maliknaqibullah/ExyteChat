@@ -8,7 +8,7 @@ public enum UserType: Int, Codable, Sendable {
     case current = 0, other, system
 }
 
-public class User: ObservableObject, Codable, Identifiable {
+open class User: ObservableObject, Codable, Identifiable {
     private enum CodingKeys: CodingKey {
         case id
         case name

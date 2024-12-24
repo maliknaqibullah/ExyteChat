@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public class Message: ObservableObject, Identifiable {
+open class Message: ObservableObject, Identifiable {
 
     public enum Status: Equatable, Hashable, Sendable {
         case sending
