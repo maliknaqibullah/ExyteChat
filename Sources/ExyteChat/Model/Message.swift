@@ -157,16 +157,19 @@ public class Recording: ObservableObject, Codable {
         case duration
         case waveformSamples
         case url
+        case mimeType
     }
 
     @Published public var duration: Double
     @Published public var waveformSamples: [CGFloat]
     @Published public var url: URL?
+    @Published public var mimeType: String?
 
-    public init(duration: Double = 0.0, waveformSamples: [CGFloat] = [], url: URL? = nil) {
+    public init(duration: Double = 0.0, waveformSamples: [CGFloat] = [], url: URL? = nil, mimeType: String? = nil) {
         self.duration = duration
         self.waveformSamples = waveformSamples
         self.url = url
+        self.mimeType = mimeType
     }
 
     required public init(from decoder: Decoder) throws {
@@ -174,6 +177,7 @@ public class Recording: ObservableObject, Codable {
         duration = try container.decode(Double.self, forKey: .duration)
         waveformSamples = try container.decode([CGFloat].self, forKey: .waveformSamples)
         url = try container.decode(URL?.self, forKey: .url)
+        mimeType = try container.decode(String?.self, forKey: .mimeType)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -181,6 +185,7 @@ public class Recording: ObservableObject, Codable {
         try container.encode(duration, forKey: .duration)
         try container.encode(waveformSamples, forKey: .waveformSamples)
         try container.encode(url, forKey: .url)
+        try container.encode(mimeType, forKey: .mimeType)
     }
 }
 
@@ -188,7 +193,8 @@ extension Recording: Equatable {
     public static func == (lhs: Recording, rhs: Recording) -> Bool {
         lhs.duration == rhs.duration &&
         lhs.waveformSamples == rhs.waveformSamples &&
-        lhs.url == rhs.url
+        lhs.url == rhs.url &&
+        lhs.mimeType == rhs.mimeType
     }
 }
     
@@ -197,6 +203,7 @@ extension Recording: Hashable {
         hasher.combine(self.duration)
         hasher.combine(self.waveformSamples)
         hasher.combine(self.url)
+        hasher.combine(self.mimeType)
     }
 }
 

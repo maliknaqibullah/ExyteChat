@@ -33,15 +33,17 @@ public struct Attachment: Codable, Identifiable, Hashable, Sendable {
     public let thumbnail: URL
     public let full: URL
     public let type: AttachmentType
+    public let mimeType: String?
 
-    public init(id: String, thumbnail: URL, full: URL, type: AttachmentType) {
+    public init(id: String, thumbnail: URL, full: URL, type: AttachmentType, mimeType: String? = nil) {
         self.id = id
         self.thumbnail = thumbnail
         self.full = full
         self.type = type
+        self.mimeType = mimeType
     }
 
-    public init(id: String, url: URL, type: AttachmentType) {
-        self.init(id: id, thumbnail: url, full: url, type: type)
+    public init(id: String, url: URL, type: AttachmentType, mimeType: String? = nil) {
+        self.init(id: id, thumbnail: url, full: url, type: type, mimeType: mimeType)
     }
 }
