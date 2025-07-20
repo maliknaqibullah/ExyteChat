@@ -1,12 +1,12 @@
 //
 //  Recorder.swift
-//  
 //
 //  Created by Alisa Mylnikova on 09.03.2023.
 //
 
 import Foundation
 @preconcurrency import AVFoundation
+import CoreGraphics
 
 final actor Recorder {
 
@@ -15,7 +15,6 @@ final actor Recorder {
 
     private let audioSession = AVAudioSession()
     private var audioRecorder: AVAudioRecorder?
-    private var audioTimer: Timer?
 
     private var soundSamples: [CGFloat] = []
     private var recorderSettings = RecorderSettings()
@@ -40,115 +39,122 @@ final actor Recorder {
         if !isAllowedToRecordAudio {
             let granted = await audioSession.requestRecordPermission()
             if granted {
-                return startRecordingInternal(durationProgressHandler)
+                return await startRecordingInternal(durationProgressHandler)
             }
             return nil
         } else {
-            return startRecordingInternal(durationProgressHandler)
+            return await startRecordingInternal(durationProgressHandler)
         }
     }
-    
-    private func startRecordingInternal(_ durationProgressHandler: @escaping ProgressHandler) -> URL? {
-        let settings: [String : Any] = [
-            AVFormatIDKey: Int(recorderSettings.audioFormatID),
-            AVSampleRateKey: recorderSettings.sampleRate,
-            AVNumberOfChannelsKey: recorderSettings.numberOfChannels,
-            AVEncoderBitRateKey: recorderSettings.encoderBitRateKey,
-            AVLinearPCMBitDepthKey: recorderSettings.linearPCMBitDepth,
-            AVLinearPCMIsFloatKey: recorderSettings.linearPCMIsFloatKey,
-            AVLinearPCMIsBigEndianKey: recorderSettings.linearPCMIsBigEndianKey,
-            AVLinearPCMIsNonInterleaved: recorderSettings.linearPCMIsNonInterleaved,
+
+    private func startRecordingInternal(_ durationProgressHandler: @escaping ProgressHandler) async -> URL? {
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 44100.0,
+            AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
 
-        soundSamples = []
-        guard let fileExt = fileExtension(for: recorderSettings.audioFormatID) else{
-            return nil
-        }
-        let recordingUrl = FileManager.tempDirPath.appendingPathComponent(UUID().uuidString + fileExt)
+        let recordingUrl = FileManager.tempDirPath
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("m4a")
 
         do {
-            try audioSession.setCategory(.record, mode: .default)
-            try audioSession.setActive(true)
-            audioRecorder = try AVAudioRecorder(url: recordingUrl, settings: settings)
-            audioRecorder?.isMeteringEnabled = true
-            audioRecorder?.record()
-            durationProgressHandler(0.0, [])
+            try AVAudioSession.sharedInstance().setCategory(
+                .playAndRecord,
+                mode: .default,
+                options: [.defaultToSpeaker, .allowBluetooth]
+            )
+            try AVAudioSession.sharedInstance().setActive(true)
 
-            audioTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-                Task {
-                    await self?.onTimer(durationProgressHandler)
-                }
+            let recorder = try AVAudioRecorder(url: recordingUrl, settings: settings)
+            recorder.isMeteringEnabled = true
+
+            guard recorder.prepareToRecord() else {
+                print("Failed to prepare recorder")
+                return nil
             }
+
+            guard recorder.record() else {
+                print("Failed to start recording")
+                return nil
+            }
+
+            self.audioRecorder = recorder
+
+            // Start async timer loop
+            startTimerLoop(durationProgressHandler)
 
             return recordingUrl
         } catch {
-            stopRecording()
+            print("Recording setup failed: \(error)")
             return nil
         }
     }
 
-    func onTimer(_ durationProgressHandler: @escaping ProgressHandler) {
-        audioRecorder?.updateMeters()
-        if let power = audioRecorder?.averagePower(forChannel: 0) {
-            // power from 0 db (max) to -60 db (roughly min)
-            let adjustedPower = 1 - (max(power, -60) / 60 * -1)
-            soundSamples.append(CGFloat(adjustedPower))
-        }
-        if let time = audioRecorder?.currentTime {
-            durationProgressHandler(time, soundSamples)
+    private func startTimerLoop(_ durationProgressHandler: @escaping ProgressHandler) {
+        Task { [weak self] in
+            while let self, await self.audioRecorder?.isRecording == true {
+                await self.onTimer(durationProgressHandler)
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+            }
         }
     }
+
+func onTimer(_ durationProgressHandler: @escaping ProgressHandler) {
+    guard let recorder = audioRecorder, recorder.isRecording else {
+        return
+    }
+
+    recorder.updateMeters()
+    let power = recorder.averagePower(forChannel: 0)
+    let currentTime = recorder.currentTime
+
+    let normalizedPower = max(0, min(1, (power + 60) / 60))
+    soundSamples.append(CGFloat(normalizedPower))
+
+    // ✅ Extract data *inside* actor context
+    let snapshotSamples = self.soundSamples
+
+    // ✅ Now safely call handler outside actor context
+    DispatchQueue.main.async {
+        durationProgressHandler(currentTime, snapshotSamples)
+    }
+}
+
 
     func stopRecording() {
         audioRecorder?.stop()
         audioRecorder = nil
-        audioTimer?.invalidate()
-        audioTimer = nil
+        // Timer is no longer used, so nothing to invalidate
     }
 
     private func fileExtension(for formatID: AudioFormatID) -> String? {
         switch formatID {
-        case kAudioFormatMPEG4AAC:
-            return ".aac"
-        case kAudioFormatLinearPCM:
-            return ".wav"
-        case kAudioFormatMPEGLayer3:
-            return ".mp3"
-        case kAudioFormatAppleLossless:
-            return ".m4a"
-        case kAudioFormatOpus:
-            return ".opus"
-        case kAudioFormatAC3:
-            return ".ac3"
-        case kAudioFormatFLAC:
-            return ".flac"
-        case kAudioFormatAMR:
-            return ".amr"
-        case kAudioFormatMIDIStream:
-            return ".midi"
-        case kAudioFormatULaw:
-            return ".ulaw"
-        case kAudioFormatALaw:
-            return ".alaw"
-        case kAudioFormatAMR_WB:
-            return ".awb"
-        case kAudioFormatEnhancedAC3:
-            return ".eac3"
-        case kAudioFormatiLBC:
-            return ".ilbc"
-        default:
-            return nil
+        case kAudioFormatMPEG4AAC: return ".aac"
+        case kAudioFormatLinearPCM: return ".wav"
+        case kAudioFormatMPEGLayer3: return ".mp3"
+        case kAudioFormatAppleLossless: return ".m4a"
+        case kAudioFormatOpus: return ".opus"
+        case kAudioFormatAC3: return ".ac3"
+        case kAudioFormatFLAC: return ".flac"
+        case kAudioFormatAMR: return ".amr"
+        case kAudioFormatMIDIStream: return ".midi"
+        case kAudioFormatULaw: return ".ulaw"
+        case kAudioFormatALaw: return ".alaw"
+        case kAudioFormatAMR_WB: return ".awb"
+        case kAudioFormatEnhancedAC3: return ".eac3"
+        case kAudioFormatiLBC: return ".ilbc"
+        default: return nil
         }
     }
 }
 
-public struct RecorderSettings : Codable,Hashable {
+public struct RecorderSettings: Codable, Hashable {
     var audioFormatID: AudioFormatID
     var sampleRate: CGFloat
     var numberOfChannels: Int
     var encoderBitRateKey: Int
-    // pcm
     var linearPCMBitDepth: Int
     var linearPCMIsFloatKey: Bool
     var linearPCMIsBigEndianKey: Bool

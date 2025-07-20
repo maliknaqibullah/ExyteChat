@@ -467,13 +467,11 @@ struct InputView: View {
         }
     }
     
+    @ViewBuilder
     var recordDuration: some View {
-        Text(DateFormatter.timeString(Int(viewModel.attachments.recording?.duration ?? 0)))
-            .foregroundColor(theme.colors.mainText)
-            .opacity(0.6)
-            .font(.caption2)
-            .monospacedDigit()
-            .padding(.trailing, 12)
+        if let recording = viewModel.attachments.recording {
+            RecordDurationView(recording: recording, theme: theme)
+        }
     }
     
     var recordDurationLeft: some View {
@@ -604,5 +602,19 @@ func performBatchTableUpdates(_ tableView: UITableView, closure: ()->()) async {
         } completion: { _ in
             continuation.resume()
         }
+    }
+}
+
+struct RecordDurationView: View {
+    @ObservedObject var recording: Recording
+    var theme: ChatTheme
+
+    var body: some View {
+        Text(DateFormatter.timeString(Int(recording.duration)))
+            .foregroundColor(theme.colors.mainText)
+            .opacity(0.6)
+            .font(.caption2)
+            .monospacedDigit()
+            .padding(.trailing, 12)
     }
 }
