@@ -207,11 +207,6 @@ extension Recording: Hashable {
     }
 }
 
-struct LocationAttachment {
-    let latitude: Double
-    let longitude: Double
-}
-
 
 
 public class ReplyMessage: ObservableObject, Codable, Identifiable, Sendable {

@@ -23,12 +23,6 @@ struct AttachmentOption: Identifiable {
     let action: () -> Void
 }
 
-struct MapLocation: Identifiable {
-    let id = UUID()
-    let coordinate: CLLocationCoordinate2D
-}
-
-
 
 public enum InputViewAction: Sendable {
     case giphy
@@ -86,7 +80,7 @@ public struct InputViewAttachments {
     var recording: Recording?
     var giphyMedia: GPHMedia?
     var replyMessage: ReplyMessage?
-    var location: LocationAttachment? // New
+    var location: MapLocation? // New
     var documentURL: URL? // New
 }
 

@@ -246,7 +246,9 @@ private extension InputViewModel {
             giphyMedia: attachments.giphyMedia,
             recording: attachments.recording,
             replyMessage: attachments.replyMessage,
-            createdAt: Date()
+            createdAt: Date(),
+            document: attachments.documentURL,
+            location: attachments.location
         )
         didSendMessage?(draft)
         DispatchQueue.main.async { [weak self] in

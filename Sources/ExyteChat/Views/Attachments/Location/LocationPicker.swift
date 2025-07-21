@@ -5,8 +5,6 @@
 //  Created by Malik on 21/07/2025.
 //
 import SwiftUI
-import ExyteMediaPicker
-import GiphyUISDK
 import MapKit
 
 struct LocationPicker: View {

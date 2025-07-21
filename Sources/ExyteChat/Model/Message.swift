@@ -207,10 +207,7 @@ extension Recording: Hashable {
     }
 }
 
-struct LocationAttachment {
-    let latitude: Double
-    let longitude: Double
-}
+
 
 
 
