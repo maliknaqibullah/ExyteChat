@@ -833,19 +833,8 @@ struct DocumentPicker: UIViewControllerRepresentable {
 
 
 
-enum ActiveSheet: Identifiable {
-    case documentPicker
-    case locationPicker
-    case attachmentPicker
 
-    var id: String {
-        switch self {
-        case .documentPicker: return "documentPicker"
-        case .locationPicker: return "locationPicker"
-        case .attachmentPicker: return "attachmentPicker"
-        }
-    }
-}
+
 
 
 struct LocationPicker: View {

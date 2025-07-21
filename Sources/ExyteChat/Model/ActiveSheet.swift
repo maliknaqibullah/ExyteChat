@@ -10,12 +10,14 @@ enum ActiveSheet: Identifiable {
     case documentPicker
     case locationPicker
     case attachmentPicker
+    case liveLocationSharing // <-- New one
 
     var id: String {
         switch self {
         case .documentPicker: return "documentPicker"
         case .locationPicker: return "locationPicker"
         case .attachmentPicker: return "attachmentPicker"
+        case .liveLocationSharing: return "liveLocationSharing"
         }
     }
 }

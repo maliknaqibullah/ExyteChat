@@ -29,19 +29,32 @@ struct LocationPicker: View {
             TappableMapView(region: $region, selectedCoordinate: $selectedCoordinate)
 
             HStack {
-                       Button("Use My Location") {
-                           if let myLocation = locationManager.currentLocation {
-                               selectedCoordinate = myLocation
-                               region.center = myLocation
-                           }
-                       }
+                Button {
+                    if let myLocation = locationManager.currentLocation {
+                        selectedCoordinate = myLocation
+                        region.center = myLocation
+                    }
+                } label: {
+                    Label("Use My Location", systemImage: "location.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.blue)
+                .controlSize(.large)
+                .padding()
 
-                       Button("Select This Location") {
-                           let coordinateToSend = selectedCoordinate ?? region.center
-                           onLocationPicked(coordinateToSend)
-                           presentationMode.wrappedValue.dismiss()
-                       }
-                       .disabled(selectedCoordinate == nil)
+                Button {
+                    let coordinateToSend = selectedCoordinate ?? region.center
+                    onLocationPicked(coordinateToSend)
+                    presentationMode.wrappedValue.dismiss()
+                } label: {
+                    Label("Select This Location", systemImage: "checkmark.circle.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .controlSize(.large)
+                .padding()
+                .disabled(selectedCoordinate == nil)
+
                    }
                    .padding()
         }

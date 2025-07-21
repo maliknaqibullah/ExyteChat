@@ -157,37 +157,47 @@ struct InputView: View {
             keyboardState.resignFirstResponder()
         }
         .sheet(item: $viewModel.activeSheet) { sheet in
-                switch sheet {
-                case .documentPicker:
-                    DocumentPicker { url in
-                        selectedDocumentURL = url
-                        viewModel.activeSheet = nil
-                        print("Selected document: \(url)")
-                    }
-
-                case .locationPicker:
-                    LocationPicker { coordinate in
-                        print("Location picked: \(coordinate)")
-                        viewModel.pickedLocation = coordinate
-                        annotations = [MapLocation(coordinate: coordinate)]
-                        viewModel.activeSheet = nil
-                    }
-
-                case .attachmentPicker:
-                    AttachmentSheetView(
-                        viewModel: viewModel,
-                        onAction: onAction,
-                        isPresented: Binding(
-                            get: { viewModel.activeSheet != nil },
-                            set: { if !$0 { viewModel.activeSheet = nil } }
-                        ),
-                        theme: theme
-                    )
-                    .presentationDetents([.height(320)])
-                    .presentationDragIndicator(.visible)
+            switch sheet {
+            case .documentPicker:
+                DocumentPicker { url in
+                    selectedDocumentURL = url
+                    viewModel.activeSheet = nil
+                    print("Selected document: \(url)")
                 }
-            
+
+            case .locationPicker:
+                LocationPicker { coordinate in
+                    print("Location picked: \(coordinate)")
+                    viewModel.pickedLocation = coordinate
+                    annotations = [MapLocation(coordinate: coordinate)]
+
+                    // After picking a location, go to live sharing screen
+                    DispatchQueue.main.async {
+                        viewModel.activeSheet = .liveLocationSharing
+                    }
+                }
+
+            case .attachmentPicker:
+                AttachmentSheetView(
+                    viewModel: viewModel,
+                    onAction: onAction,
+                    isPresented: Binding(
+                        get: { viewModel.activeSheet != nil },
+                        set: { if !$0 { viewModel.activeSheet = nil } }
+                    ),
+                    theme: theme
+                )
+                .presentationDetents([.height(320)])
+                .presentationDragIndicator(.visible)
+
+            case .liveLocationSharing:
+                LiveLocationSharingScreen {
+                    print("Stopped live sharing")
+                    viewModel.activeSheet = nil
+                }
+            }
         }
+
 
 
     }
