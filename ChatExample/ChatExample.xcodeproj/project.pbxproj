@@ -62,6 +62,8 @@
 		5B0636D52C2E9F6100E54AEE /* CommentsExampleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsExampleView.swift; sourceTree = "<group>"; };
 		5B0636DA2C2EA21900E54AEE /* Sequence+asyncMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+asyncMap.swift"; sourceTree = "<group>"; };
 		5B6D3A722987D85A00765148 /* Color+hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+hex.swift"; sourceTree = "<group>"; };
+		D3E25A8C2E2CEF2000688F6D /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		D3E25A8D2E2CF46600688F6D /* AttachmentSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentSheetView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 		135549322864620900C9459A /* ChatExample */ = {
 			isa = PBXGroup;
 			children = (
+				D3E25A8B2E2CEF1400688F6D /* newViewModel */,
 				135549332864620900C9459A /* ChatExampleApp.swift */,
 				13DF042C2864790B0043DBBC /* ContentView.swift */,
 				1376F7B3286471A80016CD1B /* Model */,
@@ -182,6 +185,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		D3E25A8B2E2CEF1400688F6D /* newViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				D3E25A8D2E2CF46600688F6D /* AttachmentSheetView.swift */,
+				D3E25A8C2E2CEF2000688F6D /* LocationManager.swift */,
+			);
+			path = newViewModel;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -214,7 +226,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1400;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 1630;
 				TargetAttributes = {
 					1355492F2864620900C9459A = {
 						CreatedOnToolsVersion = 14.0;
@@ -315,6 +327,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = FZXCM5CJ7P;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -377,6 +390,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = FZXCM5CJ7P;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -409,7 +423,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ChatExample/Preview Content\"";
-				DEVELOPMENT_TEAM = FZXCM5CJ7P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChatExample/Info.plist;
@@ -450,7 +463,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ChatExample/Preview Content\"";
-				DEVELOPMENT_TEAM = FZXCM5CJ7P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChatExample/Info.plist;
