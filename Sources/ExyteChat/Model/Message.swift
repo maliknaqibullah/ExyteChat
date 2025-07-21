@@ -152,7 +152,7 @@ extension Message: Hashable {
     }
 }
 
-public class Recording: ObservableObject, Codable {
+public class Recording: ObservableObject, Codable, Sendable {
     private enum CodingKeys: CodingKey {
         case duration
         case waveformSamples
@@ -207,7 +207,14 @@ extension Recording: Hashable {
     }
 }
 
-public class ReplyMessage: ObservableObject, Codable, Identifiable {
+struct LocationAttachment {
+    let latitude: Double
+    let longitude: Double
+}
+
+
+
+public class ReplyMessage: ObservableObject, Codable, Identifiable, Sendable {
     private enum CodingKeys: CodingKey {
         case id
         case user
@@ -291,5 +298,67 @@ public extension Message {
 
     func toReplyMessage() -> ReplyMessage {
         ReplyMessage(id: id, user: user, createdAt: createdAt, text: text, attachments: attachments, recording: recording)
+    }
+}
+
+
+struct AttachmentOptionsView: View {
+    @Environment(\.chatTheme) private var theme
+    let localization: ChatLocalization
+    let onSelect: (InputViewAction) -> Void
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            HStack(spacing: 30) {
+                // Gallery Button
+                attachmentOptionButton(
+                    image: theme.images.attachMenu.photo,
+                    label: localization.inputPlaceholder,
+                    action: { onSelect(.photo) }
+                )
+                
+                // Camera Button
+                attachmentOptionButton(
+                    image: theme.images.attachMenu.camera,
+                    label: localization.camera,
+                    action: { onSelect(.camera) }
+                )
+            }
+            
+            HStack(spacing: 30) {
+                // Document Button
+                attachmentOptionButton(
+                    image: theme.images.attachMenu.document,
+                    label: localization.document,
+                    action: { onSelect(.document) }
+                )
+                
+                // Location Button
+                attachmentOptionButton(
+                    image: theme.images.attachMenu.location,
+                    label: localization.location,
+                    action: { onSelect(.location) }
+                )
+            }
+        }
+        .padding(.vertical, 20)
+        .background(theme.colors.mainBG)
+    }
+    
+    private func attachmentOptionButton(image: Image, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+                    .padding(12)
+                    .background(Circle().fill(theme.colors.inputBG))
+                
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(theme.colors.mainText)
+            }
+        }
     }
 }

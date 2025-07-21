@@ -15,7 +15,12 @@ public struct ChatLocalization: Hashable {
     public var waitingForNetwork: String
     public var recordingText: String
     public var replyToText: String
-
+    
+    public var gallery: String
+    public var camera: String
+    public var document: String
+    public var location: String
+    
     public init(inputPlaceholder: String, signatureText: String, cancelButtonText: String, recentToggleText: String, waitingForNetwork: String, recordingText: String, replyToText: String) {
         self.inputPlaceholder = inputPlaceholder
         self.signatureText = signatureText
@@ -24,5 +29,9 @@ public struct ChatLocalization: Hashable {
         self.waitingForNetwork = waitingForNetwork
         self.recordingText = recordingText
         self.replyToText = replyToText
+        self.gallery = "Gallery"
+        self.camera =  "Camera"
+        self.document = "Document"
+        self.location = "Location"
     }
 }

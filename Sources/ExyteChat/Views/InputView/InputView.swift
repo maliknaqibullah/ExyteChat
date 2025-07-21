@@ -8,11 +8,26 @@
 import SwiftUI
 import ExyteMediaPicker
 import GiphyUISDK
+import MapKit
 
 public enum InputViewStyle: Sendable {
     case message
     case signature
 }
+
+struct AttachmentOption: Identifiable {
+    let id = UUID()
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+}
+
+struct MapLocation: Identifiable {
+    let id = UUID()
+    let coordinate: CLLocationCoordinate2D
+}
+
+
 
 public enum InputViewAction: Sendable {
     case giphy
@@ -28,8 +43,8 @@ public enum InputViewAction: Sendable {
     case deleteRecord
     case playRecord
     case pauseRecord
-    //    case location
-    //    case document
+    case location
+    case document
 
     case saveEdit
     case cancelEdit
@@ -61,6 +76,8 @@ public enum AvailableInputType: Sendable {
     case media
     case audio
     case giphy
+    case location // New
+    case document // New
 }
 
 public struct InputViewAttachments {
@@ -68,6 +85,8 @@ public struct InputViewAttachments {
     var recording: Recording?
     var giphyMedia: GPHMedia?
     var replyMessage: ReplyMessage?
+    var location: LocationAttachment? // New
+    var documentURL: URL? // New
 }
 
 struct InputView: View {
@@ -94,6 +113,12 @@ struct InputView: View {
     private var state: InputViewState {
         viewModel.state
     }
+    
+    @State private var showSheet = false
+    
+    @State private var selectedDocumentURL: URL?
+    @State private var annotations: [MapLocation] = []
+
     
     @State private var overlaySize: CGSize = .zero
     
@@ -133,6 +158,40 @@ struct InputView: View {
         .onDrag(towards: .bottom, ofAmount: 100...) {
             keyboardState.resignFirstResponder()
         }
+        .sheet(item: $viewModel.activeSheet) { sheet in
+                switch sheet {
+                case .documentPicker:
+                    DocumentPicker { url in
+                        selectedDocumentURL = url
+                        viewModel.activeSheet = nil
+                        print("Selected document: \(url)")
+                    }
+
+                case .locationPicker:
+                    LocationPicker { coordinate in
+                        print("Location picked: \(coordinate)")
+                        viewModel.pickedLocation = coordinate
+                        annotations = [MapLocation(coordinate: coordinate)]
+                        viewModel.activeSheet = nil
+                    }
+
+                case .attachmentPicker:
+                    AttachmentSheetView(
+                        viewModel: viewModel,
+                        onAction: onAction,
+                        isPresented: Binding(
+                            get: { viewModel.activeSheet != nil },
+                            set: { if !$0 { viewModel.activeSheet = nil } }
+                        ),
+                        theme: theme
+                    )
+                    .presentationDetents([.height(320)])
+                    .presentationDragIndicator(.visible)
+                }
+            
+        }
+
+
     }
     
     @ViewBuilder
@@ -328,7 +387,9 @@ struct InputView: View {
     
     var attachButton: some View {
         Button {
-            onAction(.photo)
+//            onAction(.document)
+            viewModel.activeSheet = .attachmentPicker
+
         } label: {
             theme.images.inputView.attach
                 .viewSize(24)
@@ -616,5 +677,177 @@ struct RecordDurationView: View {
             .font(.caption2)
             .monospacedDigit()
             .padding(.trailing, 12)
+    }
+}
+
+
+
+
+
+struct AttachmentSheetView: View {
+    let viewModel: InputViewModel
+      let onAction: (InputViewAction) -> Void
+      @Binding var isPresented: Bool
+      let theme: ChatTheme
+
+    
+    var options: [AttachmentOption] {
+        [
+            AttachmentOption(title: "Camera", systemImage: "camera") {
+                onAction(.camera)
+                isPresented = false   // dismiss the sheet here
+            },
+            AttachmentOption(title: "Photo", systemImage: "photo") {
+                onAction(.photo)
+                isPresented = false
+            },
+            AttachmentOption(title: "Files", systemImage: "folder") {
+                onAction(.document)
+            },
+            AttachmentOption(title: "Location", systemImage: "location") {
+                onAction(.location)
+            },
+            AttachmentOption(title: "Contact", systemImage: "person.crop.circle") {
+                print("Contact tapped")
+            },
+            AttachmentOption(title: "More", systemImage: "ellipsis.circle") {
+                print("More tapped")
+            }
+        ]
+    }
+
+
+    let columns = [
+        GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())
+    ]
+
+    var body: some View {
+        ZStack {
+            // 🍃 Background with blur material
+            VisualEffectBlur(blurStyle: .systemMaterial)
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Capsule()
+                    .frame(width: 40, height: 5)
+                    .foregroundColor(.gray.opacity(0.3))
+                    .padding(.top, 8)
+
+                Text("Choose Attachment")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+
+                LazyVGrid(columns: columns, spacing: 28) {
+                    ForEach(options) { option in
+                        VStack(spacing: 6) {
+                            AnimatedButton(action: {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                option.action()
+                            }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.blue.opacity(0.1))
+                                        .frame(width: 50, height: 50)
+
+                                    Image(systemName: option.systemImage)
+                                        .font(.system(size: 22))
+                                        .foregroundColor(theme.colors.sendButtonBackground)
+                                }
+                            }
+
+                            Text(option.title)
+                                .font(.footnote)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+
+                Spacer(minLength: 10)
+            }
+            .padding(.bottom, 20)
+        }
+    }
+}
+
+
+struct AnimatedButton<Content: View>: View {
+    let action: () -> Void
+    let content: () -> Content
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: {
+            action()
+        }) {
+            content()
+                .scaleEffect(isPressed ? 0.95 : 1.0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+        }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
+    }
+}
+
+
+struct VisualEffectBlur: UIViewRepresentable {
+    var blurStyle: UIBlurEffect.Style
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        UIVisualEffectView(effect: UIBlurEffect(style: blurStyle))
+    }
+
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
+}
+
+
+
+struct DocumentPicker: UIViewControllerRepresentable {
+    var onPicked: (URL) -> Void
+
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.item], asCopy: true)
+        picker.delegate = context.coordinator
+        picker.allowsMultipleSelection = false
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onPicked: onPicked)
+    }
+
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        var onPicked: (URL) -> Void
+
+        init(onPicked: @escaping (URL) -> Void) {
+            self.onPicked = onPicked
+        }
+
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else { return }
+            onPicked(url)
+        }
+    }
+}
+
+
+
+enum ActiveSheet: Identifiable {
+    case documentPicker
+    case locationPicker
+    case attachmentPicker
+
+    var id: String {
+        switch self {
+        case .documentPicker: return "documentPicker"
+        case .locationPicker: return "locationPicker"
+        case .attachmentPicker: return "attachmentPicker"
+        }
     }
 }

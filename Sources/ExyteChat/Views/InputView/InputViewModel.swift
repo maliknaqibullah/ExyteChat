@@ -5,7 +5,7 @@
 import Foundation
 import Combine
 import ExyteMediaPicker
-
+import MapKit
 @MainActor
 final class InputViewModel: ObservableObject {
 
@@ -16,6 +16,14 @@ final class InputViewModel: ObservableObject {
     @Published var showGiphyPicker = false
     @Published var showPicker = false
   
+    @Published  var showDocumentPicker = false
+    @Published var pickedLocation: CLLocationCoordinate2D? = nil
+       @Published var showLocationPicker: Bool = false
+    
+    @Published var activeSheet: ActiveSheet?
+
+    
+    
     @Published var mediaPickerMode = MediaPickerMode.photos
 
     @Published var showActivityIndicator = false
@@ -135,7 +143,13 @@ final class InputViewModel: ObservableObject {
             reset()
         case .cancelEdit:
             reset()
+        case .location:
+            self.activeSheet = .locationPicker
+        case .document:
+            self.activeSheet = .documentPicker
+
         }
+        
     }
 
     private func recordAudio() {
@@ -241,3 +255,6 @@ private extension InputViewModel {
         }
     }
 }
+
+
+

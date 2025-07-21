@@ -9,7 +9,7 @@ import Foundation
 import CoreGraphics
 
 final actor Recorder {
-
+  
     // duration and waveform samples
     typealias ProgressHandler = @Sendable (Double, [CGFloat]) -> Void
 
