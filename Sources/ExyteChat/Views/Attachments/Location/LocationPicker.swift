@@ -9,6 +9,7 @@ import MapKit
 
 struct LocationPicker: View {
     @Environment(\.presentationMode) var presentationMode
+    @StateObject private var locationManager = LocationManager() // <-- ADD
 
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 34.5553, longitude: 69.2075),
@@ -27,13 +28,22 @@ struct LocationPicker: View {
 
             TappableMapView(region: $region, selectedCoordinate: $selectedCoordinate)
 
-            Button("Select This Location") {
-                let coordinateToSend = selectedCoordinate ?? region.center
-                onLocationPicked(coordinateToSend)
-                presentationMode.wrappedValue.dismiss()
-            }
-            .padding()
-            .disabled(selectedCoordinate == nil)
+            HStack {
+                       Button("Use My Location") {
+                           if let myLocation = locationManager.currentLocation {
+                               selectedCoordinate = myLocation
+                               region.center = myLocation
+                           }
+                       }
+
+                       Button("Select This Location") {
+                           let coordinateToSend = selectedCoordinate ?? region.center
+                           onLocationPicked(coordinateToSend)
+                           presentationMode.wrappedValue.dismiss()
+                       }
+                       .disabled(selectedCoordinate == nil)
+                   }
+                   .padding()
         }
     }
 }
