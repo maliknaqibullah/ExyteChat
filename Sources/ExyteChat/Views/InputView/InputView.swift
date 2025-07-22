@@ -9,7 +9,8 @@ import SwiftUI
 import ExyteMediaPicker
 import GiphyUISDK
 import MapKit
-
+import UniformTypeIdentifiers
+import QuickLookThumbnailing
 
 public enum InputViewStyle: Sendable {
     case message
@@ -114,7 +115,7 @@ struct InputView: View {
     
     @State private var showSheet = false
     
-    @State private var selectedDocumentURL: URL?
+    @State var selectedDocumentURLs: [URL] = []
     @State private var annotations: [MapLocation] = []
 
     
@@ -128,11 +129,23 @@ struct InputView: View {
     @State private var tapDelayTimer: Timer?
     @State private var cancelGesture = false
     private let tapDelay = 0.2
-    
+    @State private var showDocumentPicker = false
+    @State private var selectedFiles: [URL] = []
     var body: some View {
         VStack {
             viewOnTop
             HStack(alignment: .bottom, spacing: 10) {
+                if !selectedFiles.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(selectedFiles, id: \.self) { url in
+                                    FileThumbnailView(fileURL: url)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding(.bottom, 4)
+                    }
                 HStack(alignment: .bottom, spacing: 0) {
                     leftView
                     middleView
@@ -159,11 +172,12 @@ struct InputView: View {
         .sheet(item: $viewModel.activeSheet) { sheet in
             switch sheet {
             case .documentPicker:
-                DocumentPicker { url in
-                    selectedDocumentURL = url
+                DocumentPicker { urls in
+                    selectedDocumentURLs = urls
                     viewModel.activeSheet = nil
-                    print("Selected document: \(url)")
+                    print("Selected documents: \(urls)")
                 }
+
 
             case .locationPicker:
                 LocationPicker { coordinate in

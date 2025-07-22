@@ -3,13 +3,13 @@ import UIKit
 import UniformTypeIdentifiers
 
 struct DocumentPicker: UIViewControllerRepresentable {
-    var onPicked: (URL) -> Void
+    var onPicked: ([URL]) -> Void
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let types: [UTType] = [.pdf, .plainText, .data, .item] // Add more as needed
+        let types: [UTType] = [.item]
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: true)
         picker.delegate = context.coordinator
-        picker.allowsMultipleSelection = false
+        picker.allowsMultipleSelection = true
         picker.shouldShowFileExtensions = true
         return picker
     }
@@ -21,15 +21,14 @@ struct DocumentPicker: UIViewControllerRepresentable {
     }
 
     class Coordinator: NSObject, UIDocumentPickerDelegate {
-        var onPicked: (URL) -> Void
+        var onPicked: ([URL]) -> Void
 
-        init(onPicked: @escaping (URL) -> Void) {
+        init(onPicked: @escaping ([URL]) -> Void) {
             self.onPicked = onPicked
         }
 
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            guard let url = urls.first else { return }
-            onPicked(url)
+            onPicked(urls)
         }
     }
 }

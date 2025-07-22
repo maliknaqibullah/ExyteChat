@@ -1,3 +1,11 @@
+//
+//  FileThumbnailView.swift
+//  Chat
+//
+//  Created by Malik on 22/07/2025.
+//
+
+
 import SwiftUI
 import QuickLookThumbnailing
 
