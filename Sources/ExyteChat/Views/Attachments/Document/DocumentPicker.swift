@@ -1,19 +1,16 @@
-//
-//  DocumentPicker.swift
-//  Chat
-//
-//  Created by Malik on 21/07/2025.
-//
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 struct DocumentPicker: UIViewControllerRepresentable {
     var onPicked: (URL) -> Void
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.item], asCopy: true)
+        let types: [UTType] = [.pdf, .plainText, .data] // Add more as needed
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: true)
         picker.delegate = context.coordinator
         picker.allowsMultipleSelection = false
+        picker.shouldShowFileExtensions = true
         return picker
     }
 
