@@ -7,7 +7,7 @@ import Combine
 import UIKit
 
 @MainActor
-final class ChatViewModel: ObservableObject {
+public final class ChatViewModel: ObservableObject {
 
     @Published private(set) var fullscreenAttachmentItem: Optional<Attachment> = nil
     @Published var fullscreenAttachmentPresented = false

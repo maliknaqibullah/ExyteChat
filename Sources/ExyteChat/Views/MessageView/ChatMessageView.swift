@@ -31,6 +31,7 @@ struct ChatMessageView<MessageContent: View>: View {
             if let messageBuilder = messageBuilder {
                 messageBuilder(
                     row.message,
+                    viewModel,
                     row.positionInUserGroup,
                     row.positionInMessagesSection,
                     row.commentsPosition,

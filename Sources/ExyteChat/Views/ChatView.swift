@@ -33,6 +33,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     /// - pass attachment to this closure to use ChatView's fullscreen media viewer
     public typealias MessageBuilderClosure = ((
         _ message: Message,
+        _ viewModel: ChatViewModel,
         _ positionInGroup: PositionInUserGroup,
         _ positionInMessagesSection: PositionInMessagesSection,
         _ positionInCommentsGroup: CommentsPosition?,
