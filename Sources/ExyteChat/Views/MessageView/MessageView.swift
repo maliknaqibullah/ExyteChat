@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MessageView: View {
+public struct MessageView: View {
 
     @Environment(\.chatTheme) var theme
 
@@ -48,6 +48,36 @@ struct MessageView: View {
 
     enum DateArrangement {
         case hstack, vstack, overlay
+    }
+
+    public init(
+        viewModel: ChatViewModel,
+        message: Message,
+        positionInUserGroup: PositionInUserGroup,
+        positionInMessagesSection: PositionInMessagesSection,
+        chatType: ChatType,
+        avatarSize: CGFloat = 32,
+        tapAvatarClosure: ChatView.TapAvatarClosure? = nil,
+        messageStyler: @escaping (String) -> AttributedString = { AttributedString($0) },
+        shouldShowLinkPreview: @escaping (URL) -> Bool = { _ in true },
+        isDisplayingMessageMenu: Bool = false,
+        showMessageTimeView: Bool = true,
+        messageLinkPreviewLimit: Int = 8,
+        font: UIFont = UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
+    ) {
+        self.viewModel = viewModel
+        self.message = message
+        self.positionInUserGroup = positionInUserGroup
+        self.positionInMessagesSection = positionInMessagesSection
+        self.chatType = chatType
+        self.avatarSize = avatarSize
+        self.tapAvatarClosure = tapAvatarClosure
+        self.messageStyler = messageStyler
+        self.shouldShowLinkPreview = shouldShowLinkPreview
+        self.isDisplayingMessageMenu = isDisplayingMessageMenu
+        self.showMessageTimeView = showMessageTimeView
+        self.messageLinkPreviewLimit = messageLinkPreviewLimit
+        self.font = font
     }
 
     var additionalMediaInset: CGFloat {
@@ -99,7 +129,7 @@ struct MessageView: View {
         return positionInUserGroup.isTop ? 8 : 4
     }
 
-    var body: some View {
+    public var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
             if !message.user.isCurrentUser {
                 avatarView
