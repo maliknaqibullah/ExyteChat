@@ -25,7 +25,7 @@ struct TextInputView: View {
             }
             .foregroundColor(style == .message ? theme.colors.inputText : theme.colors.inputSignatureText)
             .padding(.vertical, 10)
-            .padding(.leading, !isMediaGiphyAvailable() ? 12 : 0)
+            .padding(.leading, !isMediaAvailable() ? 12 : 0)
             .simultaneousGesture(
                 TapGesture().onEnded {
                     globalFocusState.focus = .uuid(inputFieldId)
@@ -34,9 +34,8 @@ struct TextInputView: View {
 
     }
     
-    private func isMediaGiphyAvailable() -> Bool {
+    private func isMediaAvailable() -> Bool {
         return availableInputs.contains(AvailableInputType.media)
-        || availableInputs.contains(AvailableInputType.giphy)
     }
 }
 

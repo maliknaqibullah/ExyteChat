@@ -22,10 +22,6 @@ let package = Package(
             url: "https://github.com/exyte/ActivityIndicatorView",
             from: "1.0.0"
         ),
-        .package(
-           url: "https://github.com/Giphy/giphy-ios-sdk",
-           from: "2.2.16"
-        ),
     ],
     targets: [
         .target(
@@ -33,7 +29,6 @@ let package = Package(
             dependencies: [
                 .product(name: "ExyteMediaPicker", package: "MediaPicker"),
                 .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView"),
-                .product(name: "GiphyUISDK", package: "giphy-ios-sdk")
             ],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency")
