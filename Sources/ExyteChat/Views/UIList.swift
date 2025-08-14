@@ -189,7 +189,9 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
         UIView.setAnimationsEnabled(true)
         //print("3 finished edits", runID)
 
-        if isScrolledToBottom || isScrolledToTop {
+        // Disable this optimization
+        //if isScrolledToBottom || isScrolledToTop {
+        if true {
             // step 4: inserts
             // apply the rest of the changes to table's dataSource, i.e. inserts
             //print("4 apply inserts", runID)
