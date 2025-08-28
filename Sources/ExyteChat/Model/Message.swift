@@ -45,15 +45,15 @@ open class Message: ObservableObject, Identifiable {
     }
 
     @Published public var id: String
-    @Published public var user: User
-    @Published public var status: Status?
+    @Published open var user: User
+    @Published open var status: Status?
     @Published public var createdAt: Date
 
-    @Published public var text: String
-    @Published public var attachments: [Attachment]
-    @Published public var reactions: [Reaction]
-    @Published public var recording: Recording?
-    @Published public var replyMessage: ReplyMessage?
+    @Published open var text: String
+    @Published open var attachments: [Attachment]
+    @Published open var reactions: [Reaction]
+    @Published open var recording: Recording?
+    @Published open var replyMessage: ReplyMessage?
 
     @Published public var triggerRedraw: UUID?
 
